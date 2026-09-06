@@ -2,6 +2,7 @@ import './globals.css';
 import './responsive.css';
 import './workflow-modal.css';
 import './demo-notice.css';
+import './dedicated-screens.css';
 import type { Metadata } from 'next';
 import WorkflowActionModal from '../components/WorkflowActionModal';
 import DemoNotice from '../components/DemoNotice';
