@@ -1,2 +1,2 @@
-import ModuleScreen from '../../../components/ModuleScreen';
-export default async function Page({params}:{params:Promise<{screen:string}>}){const {screen}=await params;return <ModuleScreen role="opsadmin" slug={screen}/>}
+import ModuleScreenV2 from '../../../components/ModuleScreenV2';
+export default async function Page({params}:{params:Promise<{screen:string}>}){const {screen}=await params;return <ModuleScreenV2 role="opsadmin" slug={screen}/>}
