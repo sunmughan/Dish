@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,CheckCircle2,Clock3,FileCheck2,FileText,History,Info,Landmark,LockKeyhole,MessageSquare,ShieldAlert,ShieldCheck,UserCheck,X} from 'lucide-react';
 
 type Mode='approval'|'financial'|'verification'|'document'|'support'|'security'|'request'|'settings'|'default';
@@ -28,7 +28,7 @@ const actionProfile=(screen:string,action:string,mode:Mode)=>{
 function buildSpec(role:string,screen:string,action:string):ModalSpec{
   const canonical=aliases[screen]||screen;
   if(!screens.has(canonical))throw new Error(`No workflow modal registered for screen: ${role}/${screen}`);
-  const mode=modeFor(canonical), name=human(screen), r=human(role), profile=actionProfile(canonical,action,mode);
+  const mode=modeFor(canonical),name=human(screen),r=human(role),profile=actionProfile(canonical,action,mode);
   const fieldsByMode:Record<Mode,string[]>={approval:['Reference','Decision','Operator rationale'],financial:['Transaction reference','Amount / value','Control route','Operator rationale'],verification:['Customer / account','Evidence reference','Verification result','Reviewer note'],document:['Document reference','Version','Delivery format','Operator note'],support:['Case reference','Priority','Resolution route','Resolution note'],security:['Event reference','Risk level','Control action','Investigation note'],request:['Request reference','Requested change','Validation route','Customer note'],settings:['Configuration key','Current value','New value','Change reason'],default:['Record reference','Current state','Selected action','Operator note']};
   return {title:`${action} — ${name}`,eyebrow:`${r.toUpperCase()} / ${name.toUpperCase()}`,description:`This action opens the dedicated ${name.toLowerCase()} workflow for ${r}. Capture the decision, supporting context and operator rationale before completing the demo action.`,mode,steps:profile.steps,fields:fieldsByMode[mode],primary:profile.primary,accent:accentFor(canonical),actionLabel:action};
 }
@@ -42,4 +42,13 @@ function ModalBody({state,spec,onClose}:{state:State;spec:ModalSpec;onClose:()=>
 <div className="wamInfo"><Clock3 size={14}/><span>Demo environment only — no production payment, KYC, investment or policy transaction is executed.</span></div>
 <div className="wamAudit"><ShieldCheck size={15}/><div><strong>Audit context</strong><span>Action: {state?.action} · Role: {state?.role} · Screen: {state?.screen}</span></div><History size={15}/></div>
 <footer className="wamFooter"><button type="button" className="wamSecondary" onClick={onClose}>Cancel</button><button type="button" className={spec.mode==='security'?'wamDanger':'wamPrimary'} onClick={onClose}><CheckCircle2 size={15}/>{spec.primary}</button></footer></div></div>}
-export default function WorkflowActionModal(){const[state,setState]=useState<State>(null);useEffect(()=>{const click=(e:MouseEvent)=>{const target=e.target as HTMLElement|null;const el=target?.closest?.('[data-workflow-action]') as HTMLElement|null;if(!el)return;const action=el.getAttribute('data-workflow-action');if(!action)return;e.preventDefault();e.stopPropagation();const root=el.closest('[data-workflow-screen]') as HTMLElement|null;const role=root?.getAttribute('data-workflow-role')||window.location.pathname.split('/')[1]||'';const screen=root?.getAttribute('data-workflow-screen')||window.location.pathname.split('/')[2]||'';if(!screen)return;setState({role,screen,action});};document.addEventListener('click',click,true);return()=>document.removeEventListener('click',click,true)},[]);useEffect(()=>{if(!state)return;const key=(e:KeyboardEvent)=>e.key==='Escape'&&setState(null);document.addEventListener('keydown',key);return()=>document.removeEventListener('keydown',key)},[state]);const spec=useMemo(()=>state?buildSpec(state.role,state.screen,state.action):null,[state]);if(!state||!spec)return null;return <div className="wamRoot" role="dialog" aria-modal="true" aria-label={spec.title}><button type="button" className="wamBackdrop" aria-label="Close workflow" onClick={()=>setState(null)}/><ModalBody state={state} spec={spec} onClose={()=>setState(null)}/></div>}
+export default function WorkflowActionModal(){
+  const[state,setState]=useState<State>(null);
+  const previousFocus=useRef<HTMLElement|null>(null);
+  useEffect(()=>{const click=(e:MouseEvent)=>{const target=e.target as HTMLElement|null;const el=target?.closest?.('[data-workflow-action]') as HTMLElement|null;if(!el||el.hasAttribute('disabled')||el.getAttribute('aria-disabled')==='true')return;const action=el.getAttribute('data-workflow-action');if(!action)return;e.preventDefault();e.stopPropagation();previousFocus.current=document.activeElement as HTMLElement|null;const root=el.closest('[data-workflow-screen]') as HTMLElement|null;const role=root?.getAttribute('data-workflow-role')||window.location.pathname.split('/')[1]||'';const screen=root?.getAttribute('data-workflow-screen')||window.location.pathname.split('/')[2]||'';if(!screen)return;setState({role,screen,action});};document.addEventListener('click',click,true);return()=>document.removeEventListener('click',click,true)},[]);
+  useEffect(()=>{if(!state)return;const old=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>e.key==='Escape'&&setState(null);document.addEventListener('keydown',key);return()=>{document.body.style.overflow=old;document.removeEventListener('keydown',key)}},[state]);
+  useEffect(()=>{if(state){requestAnimationFrame(()=>document.querySelector<HTMLElement>('.wamClose')?.focus())}else if(previousFocus.current){previousFocus.current.focus();previousFocus.current=null}},[state]);
+  const spec=useMemo(()=>state?buildSpec(state.role,state.screen,state.action):null,[state]);
+  if(!state||!spec)return null;
+  return <div className="wamRoot" role="dialog" aria-modal="true" aria-label={spec.title}><button type="button" className="wamBackdrop" aria-label="Close workflow" onClick={()=>setState(null)}/><ModalBody state={state} spec={spec} onClose={()=>setState(null)}/></div>
+}
