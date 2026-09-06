@@ -1,3 +1,4 @@
 'use client';
-import {Info} from 'lucide-react';
-export default function DemoNotice(){return <div className="demoNotice" role="note"><Info size={15}/><span><strong>UI Demo Only</strong> · This is a demonstration interface prepared by <strong>Codeair Software Solutions</strong>. It is not a live production system and does not process real payments, KYC, investments or policy transactions.</span></div>}
+import {Info,X} from 'lucide-react';
+import {useState} from 'react';
+export default function DemoNotice(){const [open,setOpen]=useState(true);if(!open)return null;return <div className="demoNotice" role="dialog" aria-modal="true" aria-label="UI demo notice"><div className="demoNoticeCard"><button className="demoNoticeClose" aria-label="Close demo notice" onClick={()=>setOpen(false)}><X size={17}/></button><div className="demoNoticeIcon"><Info size={18}/></div><div className="demoNoticeKicker">DISH PLATFORM</div><h2>UI Demo Only</h2><p>This website is a demonstration interface prepared by <strong>Codeair Software Solutions</strong>.</p><p className="demoNoticeMuted">It does not process real payments, KYC, investments or policy transactions.</p><button className="btn demoNoticeContinue" onClick={()=>setOpen(false)}>Continue to demo</button><div className="demoNoticeBrand">Codeair Software Solutions</div></div></div>}
