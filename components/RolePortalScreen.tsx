@@ -5,7 +5,7 @@ import {ArrowLeftRight,BarChart3,CheckCircle2,Download,FileCheck,Filter,Landmark
 type View='dashboard'|'table'|'queue'|'detail'|'form'|'chart'|'timeline'|'settings';
 type P={title:string;sub:string;view:View;kpis:string[];values:string[];columns:string[];rows:string[][];actions:string[];note:string};
 const p=(title:string,sub:string,view:View,kpis:string[],values:string[],columns:string[],rows:string[][],actions:string[],note:string):P=>({title,sub,view,kpis,values,columns,rows,actions,note});
-const A:any={
+const A:Record<string,Record<string,P>>={
 admin:{
 'dashboard':p('Command Center','Head Office operational control across policy, money, KYC, support and dispatch.','dashboard',['Active policies','Pending approvals','EMI collected today','Open escalations'],['4,812','64','₹18.4L','3'],['Area','Value','State'],[['Policy operations','4,812 active','Healthy'],['Financial operations','₹18.4L today','Healthy'],['KYC operations','82 pending','Attention'],['Support','3 escalated','Attention']],['Open approvals','View exceptions','Refresh operations'],'Single control surface for Head Office; downstream screens are separate workflows.'),
 'live-operations':p('Live Operations','Real-time operational queues and processing health.','table',['Jobs running','Queues waiting','Failed jobs','SLA breaches'],['18','42','3','2'],['Queue','Owner','Waiting','State'],[['EMI collection','Finance','12','Running'],['KYC verification','KYC','8','Running'],['Document print','Dispatch','17','Queued'],['Payout batch','Finance','5','Review']],['Inspect queue','Retry failed','Assign owner'],'Operations health is not a dashboard summary; it is a live queue workspace.'),
