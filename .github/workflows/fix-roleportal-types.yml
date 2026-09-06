@@ -1,0 +1,38 @@
+name: Fix RolePortalScreen Types
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix implicit-any in RolePortalScreen
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('components/RolePortalScreen.tsx')
+          s = p.read_text()
+          old = "const A:any={"
+          new = "const A:Record<string,Record<string,P>>={"
+          if old in s:
+              p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Commit fix
+        shell: bash
+        run: |
+          if git diff --quiet -- components/RolePortalScreen.tsx; then
+            echo "No fix needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/RolePortalScreen.tsx
+          git commit -m "fix: type RolePortalScreen profile map"
+          git push
