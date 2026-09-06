@@ -1,7 +1,7 @@
 'use client';
 import {useMemo,useState} from 'react';
-import {ArrowUpRight,BarChart3,ChevronRight,Download,Filter,Plus,RefreshCcw,Search,ShieldCheck,SlidersHorizontal,Users,WalletCards} from 'lucide-react';
-import {getScreenCatalog,type ScreenCatalog} from './ScreenSpecificCatalog';
+import {ArrowUpRight,BarChart3,ChevronRight,Download,Filter,RefreshCcw,Search,ShieldCheck,SlidersHorizontal,Users,WalletCards} from 'lucide-react';
+import {getScreenCatalog} from './ScreenSpecificCatalog';
 
 const aliases:Record<string,Record<string,string>>={
  opsadmin:{approvals:'alerts-approvals',policies:'policy-book',lifecycle:'lifecycle-manager',users:'user-master',kyc:'kyc-approval-queue',nominees:'nominee-management',cities:'city-master',developers:'developer-master',assets:'property-asset-master',allocations:'asset-allocation',ledger:'central-ledger',yield:'yield-engine',payouts:'payout-queue',settlements:'refund-settlement',documents:'document-center',support:'ticket-queue'},
@@ -9,16 +9,14 @@ const aliases:Record<string,Record<string,string>>={
  kycadmin:{kyc:'kyc-approval-queue','kyc-users':'user-kyc-master',policies:'policy-book',proposals:'proposal-queue',nominees:'nominee-management',audit:'audit-logs'},
  agent:{performance:'performance-analytics',clients:'client-registry',policies:'policy-book',emi:'emi-follow-up','payment-links':'payment-links','missed-emis':'missed-emi-alerts','follow-ups':'follow-up-tasks','lapse-warnings':'lapse-warnings',commission:'commission','tds':'tds-statements',payouts:'payout-statements'}
 };
-const actionFor=(s:string)=>({dashboard:'Open work queue','table:'Open record','queue':'Review case','detail':'Open policy','form:'Validate','chart:'Open drilldown',timeline:'Inspect event',settings:'Edit setting'}[s]||'Open record');
+const actionFor=(s:string)=>({dashboard:'Open work queue',table:'Open record',queue:'Review case',detail:'Open policy',form:'Validate',chart:'Open drilldown',timeline:'Inspect event',settings:'Edit setting'}[s]||'Open record');
 const pretty=(s:string)=>s.replaceAll('-',' ').replace(/\b\w/g,x=>x.toUpperCase());
-
 function dataFor(role:string,slug:string){const key=aliases[role]?.[slug]||slug;return {key,d:getScreenCatalog(key)};}
 
 export default function CompleteRolePortalScreen({role,slug}:{role:string;slug:string}){
- const {key,d}=useMemo(()=>dataFor(role,slug),[role,slug]);
+ const {d}=useMemo(()=>dataFor(role,slug),[role,slug]);
  const [q,setQ]=useState('');const [filter,setFilter]=useState('All');const [toast,setToast]=useState('');
  const rows=d.rows.filter(r=>r.join(' ').toLowerCase().includes(q.toLowerCase())).filter(r=>filter==='All'||r.some(x=>x.toLowerCase().includes(filter.toLowerCase())));
- const flash=(s:string)=>{setToast(s);window.setTimeout(()=>setToast(''),1800)};
  const primary=d.actions[0]||actionFor(d.view);
  return <div className="moduleScreen completeRoleScreen">
    <div className="moduleHero"><div><div className="eyebrow">{role.toUpperCase()} · {d.view.toUpperCase()}</div><h1>{d.title}</h1><p>{d.sub}</p></div><div className="heroActions"><button className="btn" data-workflow-action={d.actions[1]||'Refresh'}><RefreshCcw size={15}/> {d.actions[1]||'Refresh'}</button><button className="btn primary" data-workflow-action={primary}><ArrowUpRight size={15}/> {primary}</button></div></div>
